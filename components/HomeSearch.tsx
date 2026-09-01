@@ -63,7 +63,7 @@ export default function HomeSearch() {
             }
           }}
           placeholder="Search lost or found items..."
-          className="flex-1 rounded-l-lg border border-gray-300 px-5 py-4 outline-none focus:border-blue-500"
+          className="flex-1 rounded-l-lg border border-gray-300 px-5 py-4 text-gray-900 placeholder-gray-500 outline-none focus:border-blue-500"
         />
 
         <button
@@ -84,7 +84,7 @@ export default function HomeSearch() {
           onChange={(event) =>
             setType(event.target.value)
           }
-          className="rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-blue-500"
+          className="rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-blue-500"
         >
           <option value="">All Items</option>
           <option value="Lost">Lost Items</option>
@@ -97,7 +97,7 @@ export default function HomeSearch() {
           onChange={(event) =>
             setCategory(event.target.value)
           }
-          className="rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-blue-500"
+          className="rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-blue-500"
         >
           <option value="">All Categories</option>
 
