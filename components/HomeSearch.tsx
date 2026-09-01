@@ -47,10 +47,9 @@ export default function HomeSearch() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
-
+    <div className="mx-auto max-w-5xl w-full">
       {/* Search Input */}
-      <div className="flex">
+      <div className="flex flex-col sm:flex-row gap-2">
         <input
           type="text"
           value={search}
@@ -62,33 +61,32 @@ export default function HomeSearch() {
               handleSearch();
             }
           }}
-          placeholder="Search lost or found items..."
-          className="flex-1 rounded-l-lg border border-gray-300 px-5 py-4 text-gray-900 placeholder-gray-500 outline-none focus:border-blue-500"
+          placeholder="🔍 Search lost or found items..."
+          className="flex-1 rounded-xl border-2 border-white/50 bg-white/10 px-5 py-3 sm:py-4 text-white placeholder-white/70 backdrop-blur-sm outline-none focus:border-white focus:bg-white/20 transition-all shadow-lg"
         />
 
         <button
           type="button"
           onClick={handleSearch}
-          className="rounded-r-lg bg-blue-600 px-7 font-semibold text-white hover:bg-blue-700"
+          className="rounded-xl bg-gradient-to-r from-white to-blue-100 px-6 sm:px-8 py-3 sm:py-4 font-bold text-blue-600 hover:from-blue-50 hover:to-white transition-all shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
         >
           Search
         </button>
       </div>
 
       {/* Filters */}
-      <div className="mt-4 grid gap-4 md:grid-cols-3">
-
+      <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         {/* Type */}
         <select
           value={type}
           onChange={(event) =>
             setType(event.target.value)
           }
-          className="rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-blue-500"
+          className="rounded-lg border-2 border-white/50 bg-white/10 px-3 sm:px-4 py-2.5 sm:py-3 text-white backdrop-blur-sm outline-none focus:border-white focus:bg-white/20 transition-all font-medium text-sm sm:text-base"
         >
-          <option value="">All Items</option>
-          <option value="Lost">Lost Items</option>
-          <option value="Found">Found Items</option>
+          <option value="" className="bg-gray-900 text-white">All Items</option>
+          <option value="Lost" className="bg-gray-900 text-white">Lost Items</option>
+          <option value="Found" className="bg-gray-900 text-white">Found Items</option>
         </select>
 
         {/* Category */}
@@ -97,14 +95,14 @@ export default function HomeSearch() {
           onChange={(event) =>
             setCategory(event.target.value)
           }
-          className="rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-blue-500"
+          className="rounded-lg border-2 border-white/50 bg-white/10 px-3 sm:px-4 py-2.5 sm:py-3 text-white backdrop-blur-sm outline-none focus:border-white focus:bg-white/20 transition-all font-medium text-sm sm:text-base"
         >
-          <option value="">All Categories</option>
-
+          <option value="" className="bg-gray-900 text-white">All Categories</option>
           {categories.map((itemCategory) => (
             <option
               key={itemCategory}
               value={itemCategory}
+              className="bg-gray-900 text-white"
             >
               {itemCategory}
             </option>
@@ -115,11 +113,10 @@ export default function HomeSearch() {
         <button
           type="button"
           onClick={handleClear}
-          className="rounded-lg border border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 hover:bg-gray-100"
+          className="rounded-lg border-2 border-white/50 bg-white/10 px-3 sm:px-4 py-2.5 sm:py-3 font-medium text-white hover:bg-white/20 hover:border-white transition-all backdrop-blur-sm text-sm sm:text-base"
         >
-          Clear Filters
+          Clear
         </button>
-
       </div>
     </div>
   );

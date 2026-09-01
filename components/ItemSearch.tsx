@@ -74,10 +74,10 @@ export default function ItemSearch({
   }
 
   return (
-    <div className="mx-auto mt-8 max-w-4xl">
+    <div className="mx-auto max-w-5xl w-full">
 
       {/* Search */}
-      <div className="flex">
+      <div className="flex flex-col sm:flex-row gap-2">
         <input
           type="text"
           value={search}
@@ -89,21 +89,21 @@ export default function ItemSearch({
               handleFilter();
             }
           }}
-          placeholder="Search item, category or location..."
-          className="flex-1 rounded-l-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
+          placeholder="🔍 Search item, category or location..."
+          className="flex-1 rounded-xl border-2 border-gray-200 dark:border-gray-700 px-4 sm:px-5 py-3 sm:py-4 text-gray-900 dark:text-white dark:bg-gray-800 placeholder-gray-500 dark:placeholder-gray-400 outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all"
         />
 
         <button
           type="button"
           onClick={handleFilter}
-          className="bg-blue-600 px-6 font-medium text-white hover:bg-blue-700"
+          className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-6 sm:px-8 py-3 sm:py-4 font-bold text-white transition-all shadow-md hover:shadow-lg transform hover:scale-105 duration-200 whitespace-nowrap"
         >
           Search
         </button>
       </div>
 
       {/* Filters */}
-      <div className="mt-4 grid gap-4 md:grid-cols-3">
+      <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
 
         {/* Type */}
         <select

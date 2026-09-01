@@ -26,15 +26,10 @@ type PageProps = {
   }>;
 };
 
-async function getItem(
-  id: string
-): Promise<Item> {
-  const response = await fetch(
-    `http://localhost:3000/api/items/${id}`,
-    {
-      cache: "no-store",
-    }
-  );
+async function getItem(id: string): Promise<Item> {
+  const response = await fetch(`http://localhost:3000/api/items/${id}`, {
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     throw new Error("Item not found");
@@ -43,246 +38,183 @@ async function getItem(
   return response.json();
 }
 
-export default async function ItemDetails({
-  params,
-}: PageProps) {
-
+export default async function ItemDetails({ params }: PageProps) {
   const { id } = await params;
-
   const item = await getItem(id);
 
   const cookieStore = await cookies();
   const currentUserId = Number(cookieStore.get("user_id")?.value || 0);
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-12">
-
+    <main className="min-h-screen bg-slate-50 px-4 py-12 sm:px-6 dark:bg-slate-950">
       <div className="mx-auto max-w-3xl">
 
-        {/* Back */}
+        {/* Back Link */}
         <Link
           href="/lost-items"
-          className="mb-6 inline-block text-sm font-medium text-blue-600 hover:underline"
+          className="group mb-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 transition hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
         >
-          ← Back to Items
+          <span className="transition-transform group-hover:-translate-x-1">←</span> Back to All Items
         </Link>
 
-
-        <div className="overflow-hidden rounded-xl bg-white shadow-sm">
+        <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
 
           {/* ITEM PHOTO HEADER */}
-          {item.image_url && (
-            <div className="relative h-72 w-full bg-gray-100">
+          {item.image_url ? (
+            <div className="relative h-80 w-full overflow-hidden bg-slate-950">
               <img
                 src={item.image_url}
                 alt={item.item_name}
                 className="h-full w-full object-cover"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+
+              <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between text-white">
+                <span
+                  className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-extrabold shadow-md backdrop-blur-md ${
+                    item.item_type === "Lost"
+                      ? "bg-rose-500/90 text-white"
+                      : "bg-emerald-500/90 text-white"
+                  }`}
+                >
+                  <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                  {item.item_type} Item
+                </span>
+
+                <span className="rounded-full bg-white/20 px-3.5 py-1 text-xs font-bold backdrop-blur-md">
+                  Status: {item.status}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="border-b border-slate-100 bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white dark:border-slate-800">
+              <div className="flex items-center justify-between">
+                <span
+                  className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-extrabold shadow-sm ${
+                    item.item_type === "Lost"
+                      ? "bg-rose-500 text-white"
+                      : "bg-emerald-500 text-white"
+                  }`}
+                >
+                  {item.item_type} Item
+                </span>
+
+                <span className="rounded-full bg-white/20 px-3.5 py-1 text-xs font-bold backdrop-blur-md">
+                  Status: {item.status}
+                </span>
+              </div>
             </div>
           )}
 
-          <div className="p-8">
-
-            {/* Header */}
-            <div className="flex items-center justify-between">
-
-              <span
-                className={`rounded-full px-3.5 py-1.5 text-sm font-bold ${
-                  item.status === "Active"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                {item.status}
-              </span>
-
-              <span className="text-sm font-semibold text-gray-400">
-                ID: #{item.id}
-              </span>
-
-            </div>
-
-
-            {/* Item Name */}
-            <h1 className="mt-6 text-3xl font-bold text-gray-800">
+          <div className="p-6 sm:p-10">
+            {/* Title */}
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
               {item.item_name}
             </h1>
 
-
-            {/* Item Details */}
-            <div className="mt-8 space-y-5">
-
-              {/* Type */}
-              <div>
-                <p className="text-sm text-gray-500">
-                  Type
-                </p>
-
-                <p className="font-semibold text-gray-800">
-                  {item.item_type} Item
-                </p>
+            {/* Details Grid */}
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Category</p>
+                <p className="mt-1 text-base font-bold text-slate-800 dark:text-white">{item.category}</p>
               </div>
 
-
-              {/* Category */}
-              <div>
-                <p className="text-sm text-gray-500">
-                  Category
-                </p>
-
-                <p className="font-medium text-gray-800">
-                  {item.category}
-                </p>
+              <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Location</p>
+                <p className="mt-1 text-base font-bold text-slate-800 dark:text-white">{item.location}</p>
               </div>
 
-
-              {/* Location */}
-              <div>
-                <p className="text-sm text-gray-500">
-                  Location
-                </p>
-
-                <p className="font-medium text-gray-800">
-                  {item.location}
-                </p>
+              <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Date</p>
+                <p className="mt-1 text-base font-bold text-slate-800 dark:text-white">{item.item_date}</p>
               </div>
+            </div>
 
-
-              {/* Date */}
-              <div>
-                <p className="text-sm text-gray-500">
-                  Date
-                </p>
-
-                <p className="font-medium text-gray-800">
-                  {item.item_date}
-                </p>
-              </div>
-
-
-              {/* Description */}
-              <div>
-                <p className="text-sm text-gray-500">
-                  Description
-                </p>
-
-                <p className="leading-7 text-gray-700">
-                  {item.description}
-                </p>
-              </div>
-
+            {/* Description */}
+            <div className="mt-8">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Description &amp; Details</h2>
+              <p className="mt-2 text-base leading-relaxed text-slate-700 dark:text-slate-300">
+                {item.description}
+              </p>
             </div>
 
             {/* Owner Actions (Edit & Delete) */}
             <ItemOwnerActions item={item} currentUserId={currentUserId} />
 
-
             {/* Divider */}
-            <div className="my-8 border-t border-gray-200" />
-
+            <div className="my-10 border-t border-slate-100 dark:border-slate-800" />
 
             {/* Reporter Contact */}
-            <div className="rounded-xl bg-blue-50 p-6">
-
-              <h2 className="text-xl font-bold text-gray-800">
+            <div className="rounded-3xl border border-blue-100 bg-blue-50/70 p-6 sm:p-8 dark:border-blue-900/40 dark:bg-blue-950/30">
+              <h2 className="text-xl font-black text-slate-900 dark:text-white">
                 Contact Reporter
               </h2>
-
-              <p className="mt-1 text-sm text-gray-600">
-                Contact the person who reported this item.
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                Connect directly with the person who posted this item.
               </p>
 
-
               <div className="mt-6 space-y-4">
-
-                {/* Name */}
-                <div>
-                  <p className="text-sm text-gray-500">
-                    Name
-                  </p>
-
-                  <p className="font-medium text-gray-800">
-                    {item.reporter_name ||
-                      "Not available"}
-                  </p>
+                <div className="flex items-center justify-between border-b border-blue-100/80 pb-3 dark:border-blue-900/40">
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Reporter Name</span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">
+                    {item.reporter_name || "Anonymous User"}
+                  </span>
                 </div>
 
-
-                {/* Email */}
-                <div>
-                  <p className="text-sm text-gray-500">
-                    Email
-                  </p>
-
+                <div className="flex items-center justify-between border-b border-blue-100/80 pb-3 dark:border-blue-900/40">
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Email Address</span>
                   {item.reporter_email ? (
                     <a
                       href={`mailto:${item.reporter_email}`}
-                      className="font-medium text-blue-600 hover:underline"
+                      className="text-sm font-bold text-blue-600 hover:underline dark:text-blue-400"
                     >
                       {item.reporter_email}
                     </a>
                   ) : (
-                    <p className="text-gray-700">
-                      Not available
-                    </p>
+                    <span className="text-sm text-slate-500">Not provided</span>
                   )}
                 </div>
 
-
-                {/* Phone */}
-                <div>
-                  <p className="text-sm text-gray-500">
-                    Phone
-                  </p>
-
+                <div className="flex items-center justify-between pb-1">
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Phone Number</span>
                   {item.reporter_phone ? (
                     <a
                       href={`tel:${item.reporter_phone}`}
-                      className="font-medium text-blue-600 hover:underline"
+                      className="text-sm font-bold text-blue-600 hover:underline dark:text-blue-400"
                     >
                       {item.reporter_phone}
                     </a>
                   ) : (
-                    <p className="text-gray-700">
-                      Not available
-                    </p>
+                    <span className="text-sm text-slate-500">Not provided</span>
                   )}
                 </div>
 
-
-                {/* Contact Buttons */}
-                <div className="flex gap-3 pt-3">
-
+                {/* Contact Action Buttons */}
+                <div className="flex gap-4 pt-4">
                   {item.reporter_phone && (
                     <a
                       href={`tel:${item.reporter_phone}`}
-                      className="flex-1 rounded-lg bg-green-600 px-4 py-3 text-center font-semibold text-white hover:bg-green-700"
+                      className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700 hover:shadow-lg"
                     >
-                      📞 Call
+                      📞 Call Phone
                     </a>
                   )}
 
                   {item.reporter_email && (
                     <a
                       href={`mailto:${item.reporter_email}`}
-                      className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-center font-semibold text-white hover:bg-blue-700"
+                      className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-blue-700 hover:shadow-lg"
                     >
-                      ✉ Email
+                      ✉ Send Email
                     </a>
                   )}
-
                 </div>
-
               </div>
-
             </div>
 
           </div>
-
         </div>
-
       </div>
-
     </main>
   );
 }
