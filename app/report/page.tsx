@@ -25,6 +25,11 @@ export default function ReportItem() {
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
 
+  // Photo Upload State
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [checkingLogin, setCheckingLogin] = useState(true);
   const [message, setMessage] = useState("");
@@ -37,7 +42,7 @@ export default function ReportItem() {
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [phoneSaved, setPhoneSaved] = useState(false);
 
-  // ── 2FA OTP state ────────────────────────────────────────────────────────
+  // 2FA OTP state
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [pendingId, setPendingId] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState("");
@@ -76,6 +81,42 @@ export default function ReportItem() {
 
     checkLogin();
   }, [router]);
+
+  // ==========================================
+  // HANDLE IMAGE FILE SELECTION & UPLOAD
+  // ==========================================
+  async function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setUploadError("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setUploadError(data.message || "Failed to upload photo.");
+        return;
+      }
+
+      setImageUrl(data.url);
+    } catch (error) {
+      console.error("Upload error:", error);
+      setUploadError("Unable to upload photo. Please try again.");
+    } finally {
+      setUploadingImage(false);
+    }
+  }
 
   // ==========================================
   // SAVE PHONE NUMBER
@@ -154,7 +195,6 @@ export default function ReportItem() {
     setLoading(true);
 
     try {
-      // Call send-otp endpoint
       const response = await fetch("/api/items/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -166,6 +206,7 @@ export default function ReportItem() {
           location: location.trim(),
           date,
           description: description.trim(),
+          imageUrl,
         }),
       });
 
@@ -181,7 +222,6 @@ export default function ReportItem() {
         return;
       }
 
-      // OTP sent successfully -> Open modal
       setPendingId(data.pendingId);
       setUserEmail(data.userEmail || "");
       setOtpCode("");
@@ -204,7 +244,6 @@ export default function ReportItem() {
     e.preventDefault();
 
     if (!pendingId) return;
-
     const cleanOtp = otpCode.trim();
 
     if (!/^[0-9]{6}$/.test(cleanOtp)) {
@@ -233,7 +272,6 @@ export default function ReportItem() {
         return;
       }
 
-      // Success! Close modal and show success alert
       setShowOtpModal(false);
       setMessage("Item verified and posted successfully!");
       setMessageType("success");
@@ -245,8 +283,8 @@ export default function ReportItem() {
       setLocation("");
       setDate("");
       setDescription("");
+      setImageUrl(null);
 
-      // Redirect to dashboard after 1 second
       setTimeout(() => {
         router.push("/dashboard");
       }, 1000);
@@ -278,6 +316,7 @@ export default function ReportItem() {
           location: location.trim(),
           date,
           description: description.trim(),
+          imageUrl,
         }),
       });
 
@@ -316,11 +355,11 @@ export default function ReportItem() {
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-800">Report an Item</h1>
           <p className="mt-3 text-gray-600">
-            Report an item you have lost or found on campus with 2FA email confirmation.
+            Report an item you have lost or found on campus with photo upload &amp; 2FA email confirmation.
           </p>
         </div>
 
-        {/* CONTACT NUMBER BANNER (Google users without phone) */}
+        {/* CONTACT NUMBER BANNER */}
         {needsPhone && !phoneSaved && (
           <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-6">
             <div className="flex items-start gap-3">
@@ -402,6 +441,51 @@ export default function ReportItem() {
                 <span className="ml-2">Found Item</span>
               </button>
             </div>
+          </div>
+
+          {/* ITEM PHOTO UPLOAD */}
+          <div>
+            <label className="mb-2 block font-medium text-gray-700">
+              Item Photo <span className="text-xs text-gray-400 font-normal">(Optional)</span>
+            </label>
+
+            {imageUrl ? (
+              <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-gray-50 p-2">
+                <img
+                  src={imageUrl}
+                  alt="Item Preview"
+                  className="h-48 w-full rounded-lg object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setImageUrl(null)}
+                  className="absolute top-4 right-4 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white shadow hover:bg-red-700"
+                >
+                  ✕ Remove Photo
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center transition hover:border-blue-400">
+                <span className="text-3xl">📷</span>
+                <p className="mt-2 text-sm font-medium text-gray-700">Upload a photo of the item</p>
+                <p className="mt-1 text-xs text-gray-500">PNG, JPG, WEBP up to 10MB</p>
+
+                <label className="mt-4 inline-flex cursor-pointer items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                  {uploadingImage ? "Uploading Photo..." : "Choose Image File"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    disabled={uploadingImage}
+                    className="hidden"
+                  />
+                </label>
+
+                {uploadError && (
+                  <p className="mt-2 text-xs font-medium text-red-600">{uploadError}</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* ITEM NAME */}
@@ -504,7 +588,7 @@ export default function ReportItem() {
           {/* SUBMIT BUTTON */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || uploadingImage}
             className="w-full rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
           >
             {loading

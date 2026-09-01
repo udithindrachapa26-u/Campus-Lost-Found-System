@@ -11,6 +11,7 @@ export type Item = {
   location: string;
   item_date: string;
   description: string;
+  image_url?: string | null;
   status: "Active" | "Returned";
   created_at: string;
 };
@@ -40,6 +41,8 @@ export default function MyItemsList({ initialItems }: { initialItems: Item[] }) 
   const [location, setLocation] = useState("");
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState<"Active" | "Returned">("Active");
 
   // Delete state
@@ -54,12 +57,46 @@ export default function MyItemsList({ initialItems }: { initialItems: Item[] }) 
     setItemName(item.item_name);
     setCategory(item.category);
     setLocation(item.location);
-    // Format date string to YYYY-MM-DD for date input
     const formattedDate = item.item_date ? new Date(item.item_date).toISOString().split("T")[0] : "";
     setDate(formattedDate);
     setDescription(item.description);
+    setImageUrl(item.image_url || null);
     setStatus(item.status);
     setEditError("");
+  }
+
+  // Handle Photo Upload in Edit Modal
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setEditError("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setEditError(data.message || "Failed to upload photo");
+        return;
+      }
+
+      setImageUrl(data.url);
+    } catch (err) {
+      console.error("Image upload error:", err);
+      setEditError("Unable to upload image.");
+    } finally {
+      setUploading(false);
+    }
   }
 
   // Save Edit
@@ -84,6 +121,7 @@ export default function MyItemsList({ initialItems }: { initialItems: Item[] }) 
           location,
           date,
           description,
+          imageUrl,
           status,
         }),
       });
@@ -107,6 +145,7 @@ export default function MyItemsList({ initialItems }: { initialItems: Item[] }) 
                 location,
                 item_date: date,
                 description,
+                image_url: imageUrl,
                 status,
               }
             : item
@@ -141,7 +180,6 @@ export default function MyItemsList({ initialItems }: { initialItems: Item[] }) 
         return;
       }
 
-      // Remove from state
       setItems((prev) => prev.filter((item) => item.id !== id));
       setConfirmDeleteId(null);
     } catch (err) {
@@ -174,61 +212,74 @@ export default function MyItemsList({ initialItems }: { initialItems: Item[] }) 
           {items.map((item) => (
             <div
               key={item.id}
-              className="flex flex-col justify-between rounded-2xl bg-white p-6 shadow transition hover:shadow-md"
+              className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white shadow transition hover:shadow-md"
             >
               <div>
-                {/* Type + Status */}
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`rounded-full px-3 py-1 text-sm font-semibold ${
-                      item.item_type === "Lost"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
-                  >
-                    {item.item_type}
-                  </span>
+                {/* Photo Display */}
+                {item.image_url && (
+                  <div className="relative h-44 w-full bg-gray-100">
+                    <img
+                      src={item.image_url}
+                      alt={item.item_name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
 
-                  <span
-                    className={`rounded-full px-3 py-1 text-sm font-medium ${
-                      item.status === "Active"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {item.status}
-                  </span>
+                <div className="p-6">
+                  {/* Type + Status */}
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`rounded-full px-3 py-1 text-sm font-semibold ${
+                        item.item_type === "Lost"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-green-100 text-green-700"
+                      }`}
+                    >
+                      {item.item_type}
+                    </span>
+
+                    <span
+                      className={`rounded-full px-3 py-1 text-sm font-medium ${
+                        item.status === "Active"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+                  </div>
+
+                  {/* Item name */}
+                  <h3 className="mt-4 text-xl font-bold text-gray-800">
+                    {item.item_name}
+                  </h3>
+
+                  {/* Details */}
+                  <div className="mt-4 space-y-2 text-sm text-gray-600">
+                    <p>
+                      <span className="font-semibold">Category:</span> {item.category}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Location:</span> {item.location}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Date:</span>{" "}
+                      {item.item_date
+                        ? new Date(item.item_date).toLocaleDateString()
+                        : "N/A"}
+                    </p>
+                  </div>
+
+                  {/* Description */}
+                  <p className="mt-4 border-t pt-4 text-sm text-gray-600">
+                    {item.description}
+                  </p>
                 </div>
-
-                {/* Item name */}
-                <h3 className="mt-4 text-xl font-bold text-gray-800">
-                  {item.item_name}
-                </h3>
-
-                {/* Details */}
-                <div className="mt-4 space-y-2 text-sm text-gray-600">
-                  <p>
-                    <span className="font-semibold">Category:</span> {item.category}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Location:</span> {item.location}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Date:</span>{" "}
-                    {item.item_date
-                      ? new Date(item.item_date).toLocaleDateString()
-                      : "N/A"}
-                  </p>
-                </div>
-
-                {/* Description */}
-                <p className="mt-4 border-t pt-4 text-sm text-gray-600">
-                  {item.description}
-                </p>
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-6 border-t pt-4">
+              <div className="border-t p-6 pt-4">
                 {confirmDeleteId === item.id ? (
                   <div className="flex items-center justify-between gap-2 rounded-lg bg-red-50 p-3">
                     <span className="text-xs font-medium text-red-800">
@@ -306,6 +357,36 @@ export default function MyItemsList({ initialItems }: { initialItems: Item[] }) 
             )}
 
             <form onSubmit={handleSaveEdit} className="mt-4 space-y-4">
+              {/* Item Photo Upload */}
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Item Photo
+                </label>
+                {imageUrl ? (
+                  <div className="relative mb-2 h-40 w-full overflow-hidden rounded-xl bg-gray-100">
+                    <img src={imageUrl} alt="Preview" className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setImageUrl(null)}
+                      className="absolute top-2 right-2 rounded-full bg-black/60 p-1.5 text-xs text-white hover:bg-black"
+                    >
+                      ✕ Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploading}
+                      className="text-xs text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                    {uploading && <span className="text-xs text-blue-600">Uploading…</span>}
+                  </div>
+                )}
+              </div>
+
               {/* Type */}
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">

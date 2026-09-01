@@ -146,6 +146,7 @@ export async function POST(request: Request) {
       location,
       date,
       description,
+      imageUrl,
     } = body;
 
     // -------------------------------
@@ -187,6 +188,13 @@ export async function POST(request: Request) {
       );
     }
 
+    // Ensure image_url column exists
+    try {
+      await pool.execute(`ALTER TABLE items ADD COLUMN image_url VARCHAR(500) NULL AFTER description;`);
+    } catch (e) {
+      // Column already exists
+    }
+
     // -------------------------------
     // Insert into database
     // -------------------------------
@@ -202,9 +210,10 @@ export async function POST(request: Request) {
           category,
           location,
           item_date,
-          description
+          description,
+          image_url
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `,
         [
           numericUserId,
@@ -214,6 +223,7 @@ export async function POST(request: Request) {
           location.trim(),
           date,
           description.trim(),
+          imageUrl || null,
         ]
       );
 

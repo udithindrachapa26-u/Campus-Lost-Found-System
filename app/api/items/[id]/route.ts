@@ -8,9 +8,7 @@ type RouteParams = {
   }>;
 };
 
-// ======================================
-// GET - Get single item
-// ======================================
+// GET - Single Item
 export async function GET(
   request: Request,
   { params }: RouteParams
@@ -26,7 +24,6 @@ export async function GET(
       );
     }
 
-    // Get item and reporter details
     const [rows] = await pool.execute(
       `
       SELECT
@@ -38,6 +35,7 @@ export async function GET(
         items.location,
         items.item_date,
         items.description,
+        items.image_url,
         items.status,
         items.created_at,
 
@@ -86,9 +84,7 @@ export async function GET(
   }
 }
 
-// ======================================
-// PUT - Update item (Owner only)
-// ======================================
+// PUT - Update item
 export async function PUT(
   request: Request,
   { params }: RouteParams
@@ -105,7 +101,6 @@ export async function PUT(
     }
 
     const numericUserId = Number(userId);
-
     const { id } = await params;
     const itemId = Number(id);
 
@@ -116,7 +111,6 @@ export async function PUT(
       );
     }
 
-    // Verify ownership
     const [existingRows] = await pool.execute(
       "SELECT user_id FROM items WHERE id = ?",
       [itemId]
@@ -138,7 +132,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { itemType, itemName, category, location, date, description, status } = body;
+    const { itemType, itemName, category, location, date, description, imageUrl, status } = body;
 
     if (!itemType || !itemName || !category || !location || !date || !description) {
       return NextResponse.json(
@@ -165,6 +159,7 @@ export async function PUT(
           location = ?,
           item_date = ?,
           description = ?,
+          image_url = ?,
           status = ?
       WHERE id = ? AND user_id = ?
       `,
@@ -175,6 +170,7 @@ export async function PUT(
         location.trim(),
         date,
         description.trim(),
+        imageUrl !== undefined ? imageUrl : null,
         itemStatus,
         itemId,
         numericUserId,
@@ -194,9 +190,7 @@ export async function PUT(
   }
 }
 
-// ======================================
-// DELETE - Delete item (Owner only)
-// ======================================
+// DELETE - Delete item
 export async function DELETE(
   request: Request,
   { params }: RouteParams
@@ -213,7 +207,6 @@ export async function DELETE(
     }
 
     const numericUserId = Number(userId);
-
     const { id } = await params;
     const itemId = Number(id);
 
@@ -224,7 +217,6 @@ export async function DELETE(
       );
     }
 
-    // Verify ownership
     const [existingRows] = await pool.execute(
       "SELECT user_id FROM items WHERE id = ?",
       [itemId]

@@ -13,6 +13,7 @@ type ItemOwnerActionsProps = {
     location: string;
     item_date: string;
     description: string;
+    image_url?: string | null;
     status: "Active" | "Returned";
   };
   currentUserId: number;
@@ -46,11 +47,46 @@ export default function ItemOwnerActions({ item, currentUserId }: ItemOwnerActio
   const formattedDate = item.item_date ? new Date(item.item_date).toISOString().split("T")[0] : "";
   const [date, setDate] = useState(formattedDate);
   const [description, setDescription] = useState(item.description);
+  const [imageUrl, setImageUrl] = useState<string | null>(item.image_url || null);
+  const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState(item.status);
 
   // If not owner, return null
   if (!currentUserId || currentUserId !== item.user_id) {
     return null;
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Failed to upload photo");
+        return;
+      }
+
+      setImageUrl(data.url);
+    } catch (err) {
+      console.error(err);
+      setError("Unable to upload image.");
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -70,6 +106,7 @@ export default function ItemOwnerActions({ item, currentUserId }: ItemOwnerActio
           location,
           date,
           description,
+          imageUrl,
           status,
         }),
       });
@@ -163,6 +200,34 @@ export default function ItemOwnerActions({ item, currentUserId }: ItemOwnerActio
             <div className="rounded-lg bg-red-100 p-3 text-sm text-red-700">{error}</div>
           )}
 
+          {/* Image Upload / Change */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Item Photo</label>
+            {imageUrl ? (
+              <div className="relative mb-2 h-40 w-full overflow-hidden rounded-xl bg-gray-100">
+                <img src={imageUrl} alt="Preview" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setImageUrl(null)}
+                  className="absolute top-2 right-2 rounded-full bg-black/60 p-1.5 text-xs text-white hover:bg-black"
+                >
+                  ✕ Remove
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  className="text-xs text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                />
+                {uploading && <span className="text-xs text-blue-600">Uploading…</span>}
+              </div>
+            )}
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">Type</label>
@@ -253,7 +318,7 @@ export default function ItemOwnerActions({ item, currentUserId }: ItemOwnerActio
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || uploading}
             className="w-full rounded-lg bg-blue-600 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? "Saving Changes..." : "Save Changes"}

@@ -14,12 +14,19 @@ async function ensurePendingTable() {
       location VARCHAR(255) NOT NULL,
       item_date DATE NOT NULL,
       description TEXT NOT NULL,
+      image_url VARCHAR(500) NULL,
       otp_code VARCHAR(6) NOT NULL,
       expires_at DATETIME NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
   `);
+
+  try {
+    await pool.execute(`ALTER TABLE pending_items ADD COLUMN image_url VARCHAR(500) NULL AFTER description;`);
+  } catch (e) {
+    // Column already exists
+  }
 }
 
 export async function POST(request: Request) {
@@ -44,7 +51,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { itemType, itemName, category, location, date, description } = body;
+    const { itemType, itemName, category, location, date, description, imageUrl } = body;
 
     if (!itemType || !itemName || !category || !location || !date || !description) {
       return NextResponse.json(
@@ -60,10 +67,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Ensure pending_items table exists
     await ensurePendingTable();
 
-    // Fetch user email
     const [userRows] = await pool.execute(
       "SELECT email FROM users WHERE id = ?",
       [numericUserId]
@@ -78,22 +83,18 @@ export async function POST(request: Request) {
     }
 
     const userEmail = users[0].email;
-
-    // Generate 6-digit OTP
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Clear old pending items for this user
     await pool.execute(
       "DELETE FROM pending_items WHERE user_id = ?",
       [numericUserId]
     );
 
-    // Insert pending item record with DATE_ADD(NOW(), INTERVAL 10 MINUTE)
     const [result] = await pool.execute(
       `
       INSERT INTO pending_items
-      (user_id, item_type, item_name, category, location, item_date, description, otp_code, expires_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))
+      (user_id, item_type, item_name, category, location, item_date, description, image_url, otp_code, expires_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))
       `,
       [
         numericUserId,
@@ -103,13 +104,13 @@ export async function POST(request: Request) {
         location.trim(),
         date,
         description.trim(),
+        imageUrl || null,
         otpCode,
       ]
     );
 
     const insertResult = result as { insertId: number };
 
-    // Send OTP Email
     await sendOtpEmail(userEmail, otpCode, itemName.trim());
 
     return NextResponse.json(

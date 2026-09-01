@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import pool from "@/lib/db";
 
+async function ensureItemsImageColumn() {
+  try {
+    await pool.execute(`ALTER TABLE items ADD COLUMN image_url VARCHAR(500) NULL AFTER description;`);
+  } catch (e) {
+    // Column already exists
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
@@ -28,10 +36,11 @@ export async function POST(request: Request) {
 
     const cleanOtp = String(otpCode).trim();
 
-    // Fetch pending item matching ID, user_id and otp_code
+    await ensureItemsImageColumn();
+
     const [rows] = await pool.execute(
       `
-      SELECT id, user_id, item_type, item_name, category, location, item_date, description,
+      SELECT id, user_id, item_type, item_name, category, location, item_date, description, image_url,
              (expires_at < NOW()) AS is_expired
       FROM pending_items
       WHERE id = ? AND user_id = ? AND otp_code = ?
@@ -50,23 +59,19 @@ export async function POST(request: Request) {
 
     const pendingItem = pendingItems[0];
 
-    // Check expiration using MySQL's evaluation
     if (pendingItem.is_expired) {
-      // Clean up expired pending item
       await pool.execute("DELETE FROM pending_items WHERE id = ?", [pendingId]);
-
       return NextResponse.json(
         { message: "Verification code has expired. Please request a new code." },
         { status: 400 }
       );
     }
 
-    // OTP is valid! Insert into actual items table
     const [result] = await pool.execute(
       `
       INSERT INTO items
-      (user_id, item_type, item_name, category, location, item_date, description, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'Active')
+      (user_id, item_type, item_name, category, location, item_date, description, image_url, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Active')
       `,
       [
         numericUserId,
@@ -76,12 +81,12 @@ export async function POST(request: Request) {
         pendingItem.location,
         pendingItem.item_date,
         pendingItem.description,
+        pendingItem.image_url || null,
       ]
     );
 
     const insertResult = result as { insertId: number };
 
-    // Delete pending record
     await pool.execute("DELETE FROM pending_items WHERE id = ?", [pendingId]);
 
     return NextResponse.json(
