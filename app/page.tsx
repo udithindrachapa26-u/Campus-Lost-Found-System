@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HomeSearch from "@/components/HomeSearch";
 
 export default function Home() {
   return (
@@ -15,18 +16,7 @@ export default function Home() {
         </p>
 
         <div className="mx-auto mt-8 flex max-w-xl">
-          <input
-            type="text"
-            placeholder="Search for an item..."
-            className="flex-1 rounded-l-lg border-0 px-4 py-3 text-gray-800 outline-none"
-          />
-
-          <button
-            type="button"
-            className="rounded-r-lg bg-gray-900 px-6 py-3 font-semibold text-white hover:bg-gray-800"
-          >
-            Search
-          </button>
+          <HomeSearch />
         </div>
 
         <div className="mt-8 flex justify-center gap-4">
