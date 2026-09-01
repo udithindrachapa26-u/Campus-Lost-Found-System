@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import ItemOwnerActions from "@/components/ItemOwnerActions";
 
 type Item = {
   id: number;
@@ -47,6 +49,9 @@ export default async function ItemDetails({
   const { id } = await params;
 
   const item = await getItem(id);
+
+  const cookieStore = await cookies();
+  const currentUserId = Number(cookieStore.get("user_id")?.value || 0);
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
@@ -154,6 +159,9 @@ export default async function ItemDetails({
 
           </div>
 
+          {/* Owner Actions (Edit & Delete) */}
+          <ItemOwnerActions item={item} currentUserId={currentUserId} />
+
 
           {/* Divider */}
           <div className="my-8 border-t border-gray-200" />
@@ -168,7 +176,7 @@ export default async function ItemDetails({
 
             <p className="mt-1 text-sm text-gray-600">
               Contact the person who reported this
-              lost item.
+              item.
             </p>
 
 

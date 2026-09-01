@@ -48,9 +48,25 @@ export default function ReportItem() {
   const [messageType, setMessageType] =
     useState<"success" | "error" | "">("");
 
+  // -- Contact number state (for Google users) --------------------------
+  const [needsPhone, setNeedsPhone] =
+    useState(false);
+
+  const [phone, setPhone] =
+    useState("");
+
+  const [phoneError, setPhoneError] =
+    useState("");
+
+  const [phoneLoading, setPhoneLoading] =
+    useState(false);
+
+  const [phoneSaved, setPhoneSaved] =
+    useState(false);
+
 
   // ==========================================
-  // CHECK LOGIN
+  // CHECK LOGIN + fetch phone status
   // ==========================================
 
   useEffect(() => {
@@ -69,6 +85,13 @@ export default function ReportItem() {
           return;
         }
 
+        const data = await response.json();
+
+        // If user has no phone number saved (Google-only user)
+        if (!data.user?.phone) {
+          setNeedsPhone(true);
+        }
+
         setCheckingLogin(false);
 
       } catch (error) {
@@ -83,6 +106,61 @@ export default function ReportItem() {
 
     checkLogin();
   }, [router]);
+
+
+  // ==========================================
+  // SAVE PHONE NUMBER
+  // ==========================================
+
+  async function handleSavePhone() {
+    setPhoneError("");
+
+    const cleaned = phone.trim();
+
+    if (!/^[0-9]{10}$/.test(cleaned)) {
+      setPhoneError(
+        "Please enter a valid 10-digit phone number."
+      );
+      return;
+    }
+
+    setPhoneLoading(true);
+
+    try {
+      const response = await fetch(
+        "/api/auth/me",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ phone: cleaned }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setPhoneError(
+          data.message || "Failed to save phone number."
+        );
+        return;
+      }
+
+      // Phone saved -- dismiss the banner
+      setPhoneSaved(true);
+      setNeedsPhone(false);
+
+    } catch (error) {
+      console.error("Save phone error:", error);
+      setPhoneError(
+        "Unable to connect. Please try again."
+      );
+    } finally {
+      setPhoneLoading(false);
+    }
+  }
 
 
   // ==========================================
@@ -285,6 +363,86 @@ export default function ReportItem() {
           </p>
 
         </div>
+
+
+        {/* ==================================
+            CONTACT NUMBER BANNER
+            Shown only for Google users who
+            have not saved a phone number yet.
+        ================================== */}
+
+        {needsPhone && !phoneSaved && (
+          <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-6">
+
+            <div className="flex items-start gap-3">
+
+              {/* Icon */}
+              <span className="mt-0.5 text-2xl">
+                📞
+              </span>
+
+              <div className="flex-1">
+
+                <h2 className="font-semibold text-amber-800">
+                  Add your contact number
+                </h2>
+
+                <p className="mt-1 text-sm text-amber-700">
+                  Since you signed in with Google, we don&apos;t have
+                  your phone number yet. Add it so people can
+                  reach you about your reported item.
+                </p>
+
+                <div className="mt-4 flex gap-3">
+
+                  <input
+                    id="contact-phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => {
+                      setPhone(e.target.value);
+                      setPhoneError("");
+                    }}
+                    placeholder="10-digit phone number"
+                    maxLength={10}
+                    className="flex-1 rounded-lg border border-amber-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                  />
+
+                  <button
+                    id="save-phone-btn"
+                    type="button"
+                    onClick={handleSavePhone}
+                    disabled={phoneLoading}
+                    className="rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {phoneLoading ? "Saving..." : "Save"}
+                  </button>
+
+                </div>
+
+                {/* Phone validation error */}
+                {phoneError && (
+                  <p className="mt-2 text-sm font-medium text-red-600">
+                    {phoneError}
+                  </p>
+                )}
+
+              </div>
+
+            </div>
+
+          </div>
+        )}
+
+        {/* Phone saved confirmation */}
+        {phoneSaved && (
+          <div className="mt-8 rounded-2xl border border-green-200 bg-green-50 px-6 py-4">
+            <p className="flex items-center gap-2 text-sm font-medium text-green-700">
+              <span>✅</span>
+              Contact number saved! People can now reach you about your items.
+            </p>
+          </div>
+        )}
 
 
         {/* ==================================
