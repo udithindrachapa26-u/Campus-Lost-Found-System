@@ -16,15 +16,46 @@ export async function GET(
 
     const itemId = Number(id);
 
-    if (Number.isNaN(itemId)) {
+    if (
+      Number.isNaN(itemId) ||
+      itemId <= 0
+    ) {
       return NextResponse.json(
-        { message: "Invalid item ID" },
-        { status: 400 }
+        {
+          message: "Invalid item ID",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
+    // Get item and reporter details
     const [rows] = await pool.execute(
-      "SELECT * FROM items WHERE id = ?",
+      `
+      SELECT
+        items.id,
+        items.user_id,
+        items.item_type,
+        items.item_name,
+        items.category,
+        items.location,
+        items.item_date,
+        items.description,
+        items.status,
+        items.created_at,
+
+        users.name AS reporter_name,
+        users.email AS reporter_email,
+        users.phone AS reporter_phone
+
+      FROM items
+
+      LEFT JOIN users
+        ON items.user_id = users.id
+
+      WHERE items.id = ?
+      `,
       [itemId]
     );
 
@@ -32,18 +63,52 @@ export async function GET(
 
     if (items.length === 0) {
       return NextResponse.json(
-        { message: "Item not found" },
-        { status: 404 }
+        {
+          message: "Item not found",
+        },
+        {
+          status: 404,
+        }
       );
     }
 
-    return NextResponse.json(items[0]);
-  } catch (error) {
-    console.error("GET item error:", error);
+    const item = items[0];
+
+    // Convert MySQL Date objects to strings
+    const formattedItem = {
+      ...item,
+
+      item_date:
+        item.item_date instanceof Date
+          ? item.item_date
+              .toISOString()
+              .split("T")[0]
+          : String(item.item_date),
+
+      created_at:
+        item.created_at instanceof Date
+          ? item.created_at.toISOString()
+          : String(item.created_at),
+    };
 
     return NextResponse.json(
-      { message: "Failed to fetch item" },
-      { status: 500 }
+      formattedItem
+    );
+
+  } catch (error) {
+    console.error(
+      "GET item error:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        message:
+          "Failed to fetch item",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }

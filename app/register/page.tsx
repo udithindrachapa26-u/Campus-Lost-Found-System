@@ -8,6 +8,7 @@ export default function RegisterPage() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState("");
@@ -34,6 +35,7 @@ export default function RegisterPage() {
           body: JSON.stringify({
             name,
             email,
+            phone,
             password,
           }),
         }
@@ -43,7 +45,8 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         setError(
-          data.message || "Registration failed"
+          data.message ||
+            "Registration failed"
         );
         return;
       }
@@ -55,6 +58,7 @@ export default function RegisterPage() {
       // Clear form
       setName("");
       setEmail("");
+      setPhone("");
       setPassword("");
 
       // Go to login page after 1 second
@@ -68,6 +72,7 @@ export default function RegisterPage() {
       setError(
         "Something went wrong. Please try again."
       );
+
     } finally {
       setLoading(false);
     }
@@ -91,6 +96,7 @@ export default function RegisterPage() {
 
         </div>
 
+
         {/* Error */}
         {error && (
           <div className="mb-5 rounded-lg bg-red-100 p-3 text-sm text-red-700">
@@ -98,12 +104,14 @@ export default function RegisterPage() {
           </div>
         )}
 
+
         {/* Success */}
         {success && (
           <div className="mb-5 rounded-lg bg-green-100 p-3 text-sm text-green-700">
             {success}
           </div>
         )}
+
 
         {/* Form */}
         <form
@@ -113,6 +121,7 @@ export default function RegisterPage() {
 
           {/* Name */}
           <div>
+
             <label
               htmlFor="name"
               className="mb-2 block text-sm font-medium text-gray-700"
@@ -131,10 +140,13 @@ export default function RegisterPage() {
               required
               className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
             />
+
           </div>
+
 
           {/* Email */}
           <div>
+
             <label
               htmlFor="email"
               className="mb-2 block text-sm font-medium text-gray-700"
@@ -153,10 +165,44 @@ export default function RegisterPage() {
               required
               className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
             />
+
           </div>
+
+
+          {/* Phone */}
+          <div>
+
+            <label
+              htmlFor="phone"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Phone Number
+            </label>
+
+            <input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(event) =>
+                setPhone(event.target.value)
+              }
+              placeholder="e.g. 0771234567"
+              required
+              pattern="[0-9]{10}"
+              title="Please enter a 10-digit phone number"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
+            />
+
+            <p className="mt-1 text-xs text-gray-500">
+              Enter a 10-digit phone number
+            </p>
+
+          </div>
+
 
           {/* Password */}
           <div>
+
             <label
               htmlFor="password"
               className="mb-2 block text-sm font-medium text-gray-700"
@@ -176,7 +222,9 @@ export default function RegisterPage() {
               minLength={6}
               className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
             />
+
           </div>
+
 
           {/* Register Button */}
           <button
@@ -191,17 +239,22 @@ export default function RegisterPage() {
 
         </form>
 
+
         {/* Login Link */}
         <p className="mt-6 text-center text-sm text-gray-600">
+
           Already have an account?{" "}
 
           <button
             type="button"
-            onClick={() => router.push("/login")}
+            onClick={() =>
+              router.push("/login")
+            }
             className="font-semibold text-blue-600 hover:underline"
           >
             Login
           </button>
+
         </p>
 
       </div>
