@@ -30,7 +30,7 @@ async function getItem(id: string): Promise<Item> {
   return response.json();
 }
 
-export default async function ItemDetails({
+export default async function FoundItemDetails({
   params,
 }: PageProps) {
   const { id } = await params;
@@ -40,17 +40,11 @@ export default async function ItemDetails({
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
       <div className="mx-auto max-w-3xl">
-
         <div className="rounded-xl bg-white p-8 shadow-sm">
 
+          {/* Header */}
           <div className="flex items-center justify-between">
-            <span
-              className={`rounded-full px-3 py-1 text-sm font-medium ${
-                item.status === "Active"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-700"
-              }`}
-            >
+            <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
               {item.status}
             </span>
 
@@ -59,12 +53,15 @@ export default async function ItemDetails({
             </span>
           </div>
 
+          {/* Item Name */}
           <h1 className="mt-6 text-3xl font-bold text-gray-800">
             {item.item_name}
           </h1>
 
+          {/* Details */}
           <div className="mt-8 space-y-5">
 
+            {/* Type */}
             <div>
               <p className="text-sm text-gray-500">
                 Type
@@ -75,6 +72,7 @@ export default async function ItemDetails({
               </p>
             </div>
 
+            {/* Category */}
             <div>
               <p className="text-sm text-gray-500">
                 Category
@@ -85,6 +83,7 @@ export default async function ItemDetails({
               </p>
             </div>
 
+            {/* Location */}
             <div>
               <p className="text-sm text-gray-500">
                 Location
@@ -95,9 +94,10 @@ export default async function ItemDetails({
               </p>
             </div>
 
+            {/* Date */}
             <div>
               <p className="text-sm text-gray-500">
-                Date
+                Date Found
               </p>
 
               <p className="font-medium text-gray-800">
@@ -105,6 +105,7 @@ export default async function ItemDetails({
               </p>
             </div>
 
+            {/* Description */}
             <div>
               <p className="text-sm text-gray-500">
                 Description

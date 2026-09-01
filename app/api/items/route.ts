@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 
-export async function GET() {
+/*export async function GET() {
   try {
     const [rows] = await pool.query(
       "SELECT * FROM items ORDER BY created_at DESC"
@@ -14,6 +14,72 @@ export async function GET() {
     return NextResponse.json(
       { message: "Failed to fetch items" },
       { status: 500 }
+    );
+  }
+}*/
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+
+    const search = searchParams.get("search") || "";
+    const type = searchParams.get("type") || "";
+    const category = searchParams.get("category") || "";
+
+    let query = `
+      SELECT *
+      FROM items
+      WHERE 1 = 1
+    `;
+
+    const values: string[] = [];
+
+    // Search
+    if (search) {
+      query += `
+        AND (
+          item_name LIKE ?
+          OR category LIKE ?
+          OR location LIKE ?
+        )
+      `;
+
+      const searchValue = `%${search}%`;
+
+      values.push(
+        searchValue,
+        searchValue,
+        searchValue
+      );
+    }
+
+    // Lost / Found filter
+    if (type && (type === "Lost" || type === "Found")) {
+      query += ` AND item_type = ?`;
+      values.push(type);
+    }
+
+    // Category filter
+    if (category) {
+      query += ` AND category = ?`;
+      values.push(category);
+    }
+
+    query += ` ORDER BY created_at DESC`;
+
+    const [rows] = await pool.execute(query, values);
+
+    return NextResponse.json(rows);
+  } catch (error) {
+    console.error("GET items error:", error);
+
+    return NextResponse.json(
+      {
+        message: "Failed to fetch items",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
