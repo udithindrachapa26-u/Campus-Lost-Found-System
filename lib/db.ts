@@ -25,7 +25,7 @@ const pool = mysql.createPool({
   connectionLimit: 5,
   queueLimit: 0,
   ssl: {
-    rejectUnauthorized: true,
+    rejectUnauthorized: false,
   },
 });
 
