@@ -52,8 +52,9 @@ export async function sendOtpEmail(toEmail: string, otp: string, itemName: strin
       console.log(`✅ OTP email successfully dispatched via SMTP to ${toEmail}`);
     } catch (error) {
       console.error("⚠️ SMTP email sending error:", error);
+      throw error;
     }
   } else {
-    console.log(`ℹ️ SMTP credentials not configured in .env.local. OTP logged above for testing.`);
+    console.log(`ℹ️ SMTP credentials not configured. OTP logged above for testing.`);
   }
 }
