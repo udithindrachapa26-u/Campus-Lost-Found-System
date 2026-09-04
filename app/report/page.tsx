@@ -410,11 +410,10 @@ export default function ReportItem() {
               <button
                 type="button"
                 onClick={() => setItemType("Lost")}
-                className={`flex items-center justify-center gap-3 rounded-2xl border-2 p-4 font-bold text-sm transition-all duration-200 ${
-                  itemType === "Lost"
+                className={`flex items-center justify-center gap-3 rounded-2xl border-2 p-4 font-bold text-sm transition-all duration-200 ${itemType === "Lost"
                     ? "border-rose-500 bg-rose-50/80 text-rose-600 shadow-md shadow-rose-500/10 dark:bg-rose-950/40 dark:text-rose-400"
                     : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400 dark:hover:border-slate-700"
-                }`}
+                  }`}
               >
                 <span className="text-xl">🔴</span>
                 <span>Lost Item</span>
@@ -423,11 +422,10 @@ export default function ReportItem() {
               <button
                 type="button"
                 onClick={() => setItemType("Found")}
-                className={`flex items-center justify-center gap-3 rounded-2xl border-2 p-4 font-bold text-sm transition-all duration-200 ${
-                  itemType === "Found"
+                className={`flex items-center justify-center gap-3 rounded-2xl border-2 p-4 font-bold text-sm transition-all duration-200 ${itemType === "Found"
                     ? "border-emerald-500 bg-emerald-50/80 text-emerald-600 shadow-md shadow-emerald-500/10 dark:bg-emerald-950/40 dark:text-emerald-400"
                     : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400 dark:hover:border-slate-700"
-                }`}
+                  }`}
               >
                 <span className="text-xl">🟢</span>
                 <span>Found Item</span>
@@ -573,11 +571,10 @@ export default function ReportItem() {
           {/* MESSAGE */}
           {message && (
             <div
-              className={`rounded-2xl p-4 text-center text-sm font-bold shadow-sm ${
-                messageType === "success"
+              className={`rounded-2xl p-4 text-center text-sm font-bold shadow-sm ${messageType === "success"
                   ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
                   : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
-              }`}
+                }`}
             >
               {message}
             </div>
@@ -598,7 +595,7 @@ export default function ReportItem() {
                 Sending OTP Code…
               </span>
             ) : (
-              "Proceed to 2FA Email Verification →"
+              "Add a post"
             )}
           </button>
         </form>

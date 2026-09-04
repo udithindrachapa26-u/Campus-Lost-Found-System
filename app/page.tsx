@@ -27,7 +27,7 @@ export default function Home() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-base sm:text-xl text-slate-300 font-normal leading-relaxed">
-            Lost an item on campus or found someone else&apos;s belonging? Report it in seconds with instant 2FA email verification and photo search.
+            Lost an item on campus or found someone else&apos;s belonging? Report it in seconds.
           </p>
 
           {/* Search Box */}
