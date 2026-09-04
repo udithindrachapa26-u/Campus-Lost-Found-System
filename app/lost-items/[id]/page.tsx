@@ -27,7 +27,7 @@ type PageProps = {
 };
 
 async function getItem(id: string): Promise<Item> {
-  const response = await fetch(`http://localhost:3000/api/items/${id}`, {
+  const response = await fetch(`https://campus-lost-found-system-roan.vercel.app/api/items/${id}`, {
     cache: "no-store",
   });
 
@@ -71,11 +71,10 @@ export default async function ItemDetails({ params }: PageProps) {
 
               <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between text-white">
                 <span
-                  className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-extrabold shadow-md backdrop-blur-md ${
-                    item.item_type === "Lost"
+                  className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-extrabold shadow-md backdrop-blur-md ${item.item_type === "Lost"
                       ? "bg-rose-500/90 text-white"
                       : "bg-emerald-500/90 text-white"
-                  }`}
+                    }`}
                 >
                   <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
                   {item.item_type} Item
@@ -90,11 +89,10 @@ export default async function ItemDetails({ params }: PageProps) {
             <div className="border-b border-slate-100 bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white dark:border-slate-800">
               <div className="flex items-center justify-between">
                 <span
-                  className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-extrabold shadow-sm ${
-                    item.item_type === "Lost"
+                  className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-extrabold shadow-sm ${item.item_type === "Lost"
                       ? "bg-rose-500 text-white"
                       : "bg-emerald-500 text-white"
-                  }`}
+                    }`}
                 >
                   {item.item_type} Item
                 </span>

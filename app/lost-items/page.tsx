@@ -25,7 +25,7 @@ async function getItems(
   category?: string
 ): Promise<Item[]> {
   const url = new URL(
-    "http://localhost:3000/api/items"
+    "https://campus-lost-found-system-roan.vercel.app/api/items"
   );
 
   url.searchParams.set("type", "Lost");
@@ -87,7 +87,7 @@ export default async function LostItems({
             <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
               {params.search && (
                 <span>
-                  Search: <span className="font-bold text-gray-900 dark:text-white">\"{ params.search}\"</span>
+                  Search: <span className="font-bold text-gray-900 dark:text-white">\"{params.search}\"</span>
                 </span>
               )}
               {params.search && params.category && <span className="mx-2">•</span>}
