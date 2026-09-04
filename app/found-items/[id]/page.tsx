@@ -27,7 +27,7 @@ async function getItem(
   id: string
 ): Promise<Item> {
   const response = await fetch(
-    `http://localhost:3000/api/items/${id}`,
+    `https://campus-lost-found-system-roan.vercel.app/api/items/${id}`,
     {
       cache: "no-store",
     }
@@ -68,11 +68,10 @@ export default async function FoundItemDetails({
           <div className="flex items-center justify-between">
 
             <span
-              className={`rounded-full px-3 py-1 text-sm font-medium ${
-                item.status === "Active"
+              className={`rounded-full px-3 py-1 text-sm font-medium ${item.status === "Active"
                   ? "bg-green-100 text-green-700"
                   : "bg-gray-100 text-gray-700"
-              }`}
+                }`}
             >
               {item.status}
             </span>
