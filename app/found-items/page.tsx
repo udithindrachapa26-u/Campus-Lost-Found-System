@@ -25,7 +25,7 @@ async function getItems(
   category?: string
 ): Promise<Item[]> {
   const url = new URL(
-    "http://localhost:3000/api/items"
+    "https://campus-lost-found-system-roan.vercel.app/api/items"
   );
 
   url.searchParams.set("type", "Found");
